@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gelados Da Anny 🍧</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI,Arial,sans-serif;
+    background:radial-gradient(circle at top,#ffe1ec,#ffc1d9);
+}
+header{
+    text-align:center;
+    padding:30px;
+    color:#fff;
+    background:linear-gradient(135deg,#ff3f8e,#ff78b0);
+    box-shadow:0 15px 30px rgba(0,0,0,.3);
+}
+section{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+}
+.card{
+    background:#fff;
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 20px 40px rgba(0,0,0,.15);
+    transition:.3s;
+}
+.card:hover{transform:translateY(-6px)}
+h2{color:#ff3f8e}
+input,select,button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:15px;
+}
+button{
+    background:linear-gradient(135deg,#ff3f8e,#ff78b0);
+    color:#fff;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+.status{
+    text-align:center;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+.aberto{color:#0a8f3c}
+.fechado{color:#b30000}
+.pixBox{
+    background:#fff0f7;
+    border-radius:12px;
+    padding:15px;
+    margin-top:10px;
+}
+footer{
+    text-align:center;
+    padding:15px;
+    color:#555;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🍧 Gelados Da Anny</h1>
+<p>Dindin & Mousses Artesanais</p>
+</header>
+
+<section>
+
+<div id="statusLoja" class="status"></div>
+
+<div class="card">
+<h2>👤 Cliente</h2>
+<input id="nome" placeholder="Nome do cliente">
+<input id="endereco" placeholder="Endereço completo">
+</div>
+
+<div class="card">
+<h2>🍦 Produto</h2>
+<select id="produto">
+<option>Dindin Tradicional</option>
+<option>Dindin com Recheio de Chocolate 🍫</option>
+<option>Mousse Tradicional</option>
+<option>Mousse com Recheio de Chocolate 🍫</option>
+</select>
+
+<select id="sabor">
+<option>Morango 🍓</option>
+<option>Uva 🍇</option>
+<option>Abacaxi 🍍</option>
+<option>Maracujá</option>
+<option>Chocolate 🍫</option>
+</select>
+
+<input type="number" id="quantidade" placeholder="Quantidade" min="1">
+<input type="number" id="valor" placeholder="Valor unitário (R$)">
+</div>
+
+<div class="card">
+<h2>💳 Pagamento</h2>
+<select id="pagamento">
+<option>Pix</option>
+<option>Dinheiro</option>
+<option>Cartão</option>
+</select>
+
+<div class="pixBox">
+<b>🔑 Chave Pix:</b><br>
+<span id="pixKey">cf0299ff-c43f-41ee-9a26-d35b07463e3b</span><br><br>
+<button onclick="copiarPix()">📋 Copiar chave Pix</button>
+</div>
+</div>
+
+<button onclick="finalizarPedido()">📲 Finalizar Pedido</button>
+
+</section>
+
+<footer>
+💖 Obrigado por escolher a Gelados Da Anny
+</footer>
+
+<script>
+const statusDiv = document.getElementById("statusLoja");
+const agora = new Date();
+const dia = agora.getDay();
+const hora = agora.getHours();
+let lojaAberta = !(dia===0 || dia===6 || hora<15 || hora>=22);
+
+statusDiv.textContent = lojaAberta
+ ? "🟢 Loja aberta — Segunda a Sexta, 15h às 22h"
+ : "🔴 Loja fechada — Atendimento apenas em horário comercial";
+statusDiv.classList.add(lojaAberta ? "aberto" : "fechado");
+
+function copiarPix(){
+    navigator.clipboard.writeText(
+      document.getElementById("pixKey").innerText
+    );
+    alert("Chave Pix copiada com sucesso!");
+}
+
+function finalizarPedido(){
+    if(!lojaAberta){
+        alert("A loja está fechada no momento.");
+        return;
+    }
+
+    const pedido = Math.floor(Math.random()*9000)+1000;
+    const nome = document.getElementById("nome").value;
+    const endereco = document.getElementById("endereco").value;
+    const produtoSelecionado = document.getElementById("produto").value;
+    const saborSelecionado = document.getElementById("sabor").value;
+    const qtd = document.getElementById("quantidade").value;
+    const valor = document.getElementById("valor").value;
+    const pagamento = document.getElementById("pagamento").value;
+
+    if(!nome || !endereco || !qtd || !valor){
+        alert("Preencha todos os campos!");
+        return;
+    }
+
+    const total = (qtd * valor).toFixed(2);
+
+    // PDF
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    pdf.text("Comprovante - Gelados Da Anny",10,10);
+    pdf.text(`Pedido Nº ${pedido}`,10,20);
+    pdf.text(`Cliente: ${nome}`,10,30);
+    pdf.text(`Endereço: ${endereco}`,10,40);
+    pdf.text(`Produto: ${produtoSelecionado}`,10,50);
+    pdf.text(`Sabor: ${saborSelecionado}`,10,60);
+    pdf.text(`Quantidade: ${qtd}`,10,70);
+    pdf.text(`Total: R$ ${total}`,10,80);
+    pdf.text(`Pagamento: ${pagamento}`,10,90);
+    pdf.save(`Pedido_${pedido}.pdf`);
+
+    const mensagem =
+`🍧 *Pedido Nº ${pedido} - Gelados Da Anny* 🍧
+👤 ${nome}
+📍 ${endereco}
+🍦 ${produtoSelecionado} - ${saborSelecionado}
+🔢 ${qtd} unidade(s)
+💰 Total: R$ ${total}
+💳 Pagamento: ${pagamento}
+
+🔑 Pix:
+cf0299ff-c43f-41ee-9a26-d35b07463e3b`;
+
+    window.open(
+      "https://wa.me/5586998120194?text=" + encodeURIComponent(mensagem),
+      "_blank"
+    );
+}
+</script>
+
+</body>
+</html>
